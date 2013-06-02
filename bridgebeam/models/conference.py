@@ -74,7 +74,7 @@ class Conference(object):
             self.db.add_to_conference(call_sid, self.uuid, call_number) 
 
     @classmethod
-    def remove_from_conferences(call_sid):
+    def remove_from_conferences(self, call_sid):
         """Removes call from all conferences for given call_sid"""
         db = DB()
         db.remove_call(call_sid)

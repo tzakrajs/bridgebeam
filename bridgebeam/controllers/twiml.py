@@ -57,4 +57,4 @@ def quit():
     """
     call_sid = request.forms.get('CallSid')
     log.debug("received quit from {}".format(call_sid))
-    remove_from_conferences(call_sid)
+    Conference.remove_from_conferences(call_sid)
