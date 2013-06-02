@@ -1,53 +1,43 @@
 #!/usr/bin/env python
 
-# Bootstrap installation of Distribute
-import distribute_setup
-distribute_setup.use_setuptools()
+import bridgebeam
 
-import os
-
-from setuptools import setup
-
-
-PROJECT = u'bridgebeam'
-VERSION = '0.1'
-URL = ''
-AUTHOR = u'Thomas Zakrajsek'
-AUTHOR_EMAIL = u'tzakrajsek@netflix.com'
-DESC = "A short description..."
-
-def read_file(file_name):
-    file_path = os.path.join(
-        os.path.dirname(__file__),
-        file_name
-        )
-    return open(file_path).read()
+from setuptools import setup, find_packages
 
 setup(
-    name=PROJECT,
-    version=VERSION,
-    description=DESC,
-    long_description=read_file('README.rst'),
-    author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
-    url=URL,
-    license=read_file('LICENSE'),
-    namespace_packages=[],
-    packages=[u'bridgebeam'],
-    package_dir = {'': os.path.dirname(__file__)},
-    include_package_data=True,
-    zip_safe=False,
-    install_requires=[
-        # -*- Requirements -*-
-    ],
-    entry_points = {
-        # -*- Entry points -*-
-    },
-    classifiers=[
-    	# see http://pypi.python.org/pypi?:action=list_classifiers
-        # -*- Classifiers -*- 
-        'License :: OSI Approved',
-        'License :: OSI Approved :: GNU General Public License (GPL)',
-        "Programming Language :: Python",
-    ],
+        name='bridgebeam',
+        version=bridgebeam.__version__,
+
+        description='a simple conference bridge solution using Twiio',
+        long_description=open('README.rst').read(),
+
+        author='Thomas Zakrajsek',
+        author_email='tzakrajs@gmail.com',
+
+        url='https://github.com/tzakrajs/bridgebeam',
+
+        scripts=['run_server.py', ],
+
+        include_package_data=True,
+        packages=find_packages(),
+
+        license=open('LICENSE').read(),
+
+        install_requires=[
+                    'twilio == 3.5.1',
+                ],
+
+        keywords='twilio conference bridge',
+        classifiers=[
+                    'Development Status :: 3 - Alpha',
+                    'Programming Language :: Python',
+                    'Programming Language :: Python :: 2.7',
+                    'Framework :: Bottle',
+                    'Operating System :: OS Independent',
+                    'Environment :: Console',
+                    'Intended Audience :: Information Technology',
+                    'Natural Language :: English',
+                    'Topic :: Communications :: Telephony',
+                    'License :: OSI Approved :: Apache Software License',
+                ],
 )
