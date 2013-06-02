@@ -1,4 +1,4 @@
-from bridgebeam import app
+from bridgebeam import application
 from bottle import request
 from bridgebeam.models.conference import Conference, remove_from_conferences
 from twilio import twiml
@@ -6,7 +6,7 @@ import logging
 
 log = logging.getLogger('bridgebeam')
 
-@app.route('/twiml/join/<conference_uuid>', method='POST')
+@application.route('/twiml/join/<conference_uuid>', method='POST')
 def join(conference_uuid):
     log.debug("received join on {}".format(conference_uuid))
     conference = Conference(uuid=conference_uuid)
@@ -39,7 +39,7 @@ def join(conference_uuid):
         log.debug("sending twiml: {}".format(str(r)))
         return str(r)
 
-@app.route('/twiml/quit', method='POST')
+@application.route('/twiml/quit', method='POST')
 def quit():
     call_sid = request.forms.get('CallSid')
     log.debug("received quit from {}".format(call_sid))

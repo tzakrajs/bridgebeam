@@ -1,4 +1,4 @@
-from bridgebeam import twilio
+from bridgebeam.models.twilio_client import twilio
 from bridgebeam.models.db import DB
 import logging
 import re

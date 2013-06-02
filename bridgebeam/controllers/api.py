@@ -1,4 +1,4 @@
-from bridgebeam import app
+from bridgebeam import application
 from bottle import request
 from bridgebeam.models.conference import Conference, get_conferences
 import json
@@ -6,7 +6,7 @@ import logging
 
 log = logging.getLogger('bridgebeam')
 
-@app.route('/api/v1/conference/list', method='GET')
+@application.route('/api/v1/conference/list', method='GET')
 def list_conferences():
     conferences = get_conferences()
     for conference in conferences.keys():
@@ -16,7 +16,7 @@ def list_conferences():
         conferences[conference] = private_numbers
     return json.dumps(conferences)
 
-@app.route('/api/v1/conference/join', method='POST')
+@application.route('/api/v1/conference/join', method='POST')
 def join_conference():
     conference_name = str(request.forms.get('conference_name'))
     conference = Conference(name=conference_name)

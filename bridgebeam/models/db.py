@@ -1,3 +1,4 @@
+from bridgebeam import application
 import logging
 import sqlite3
 
@@ -8,7 +9,7 @@ class DB(object):
         # instantiate logger
         self.log = logging.getLogger('bridgebeam')
         # open sqlite db (yes this is gross... it's hackday!)
-        db_path='/opt/bridgebeam/bridgebeam.db'
+        db_path=application.config.DB.path
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
         self._create_schema()
