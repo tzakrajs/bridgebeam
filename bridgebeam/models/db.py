@@ -4,6 +4,7 @@ import sqlite3
 
 class DB(object):
     """Set and get state for a given item"""
+
     def __init__(self):
         """Instantiates a database if none exists"""
         # instantiate logger
@@ -58,12 +59,12 @@ class DB(object):
             "WHERE conferences.uuid = calls.conference_uuid"
         return self.cursor.execute(q).fetchall()
                 
-
     def create_conference(self, uuid=None, name=None):
         """Add a new conference into the conferences table"""
         if uuid and name:
-            q = "INSERT INTO conferences (uuid, name) VALUES (?, ?)" 
-            self.cursor.execute(q, (uuid, name))
+            q = "INSERT INTO conferences (uuid, name) " + \
+                "VALUES ('{}', '{}')".format(uuid, name) 
+            self.cursor.execute(q)
             self.conn.commit()
 
     def add_to_conference(

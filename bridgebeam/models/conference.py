@@ -1,5 +1,6 @@
 from bridgebeam.models.twilio_client import twilio
 from bridgebeam.models.db import DB
+from bridgebeam import application
 import logging
 import re
 import uuid
@@ -15,7 +16,10 @@ class Conference(object):
         # instantiate logger
         self.log = logging.getLogger('bridgebeam')
         # get bridgebeam conference uuid
-        self.uuid = kwargs.get('uuid', uuid.uuid4())
+        self.uuid = kwargs.get('uuid')
+        if not self.uuid:
+            self.uuid = uuid.uuid4()
+        self.twiml_base_url = application.config.Twiml.callback_base_url
         # connect to the db
         self.db = DB()
         try:
