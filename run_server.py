@@ -2,6 +2,7 @@
 from bridgebeam import application
 
 # global variables config
+application.config.Twiml.callback_base_url = 'http://somedomain.com:8080/'
 application.config.Twilio.account_sid = 'ACCOUNT_SID'
 application.config.Twilio.auth_token = 'AUTH_TOKEN'
 application.config.DB.path = './bridgebeam.db'

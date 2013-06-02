@@ -1,6 +1,6 @@
 from bridgebeam import application
 from bottle import request
-from bridgebeam.models.conference import Conference, get_conferences
+from bridgebeam.models.conference import Conference
 import json
 import logging
 
@@ -8,7 +8,8 @@ log = logging.getLogger('bridgebeam')
 
 @application.route('/api/v1/conference/list', method='GET')
 def list_conferences():
-    conferences = get_conferences()
+    """Return a json object of all conferences and their connected numbers"""
+    conferences = Conference.get_conferences()
     for conference in conferences.keys():
         private_numbers = []
         for number in conferences[conference]:

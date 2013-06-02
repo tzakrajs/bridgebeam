@@ -44,20 +44,14 @@ class DB(object):
 
     def get_conferences(self):
         """
-        Returns a dict of conferences
-        - Each key in the dict contains a list of phone numbers
-        - Those phone numbers represent present calls connected to the bridge
+        Does a join with calls and conferences
+           
+        Returns rows of conference name and phone number as columns
 
         """
-        q = "SELECT name, phone_number FROM conferences, calls WHERE conferences.uuid = calls.conference_uuid"
-        rows = self.cursor.execute(q).fetchall()
-        conferences = {}
-        for conference_name, phone_number in rows:
-            if conference_name in conferences.keys():
-                conferences[conference_name].append(phone_number)
-            else:
-                conferences[conference_name] = [phone_number,]
-        return conferences
+        q = "SELECT name, phone_number FROM conferences, calls " + \
+            "WHERE conferences.uuid = calls.conference_uuid"
+        return self.cursor.execute(q).fetchall()
                 
 
     def create_conference(self, uuid=None, name=None):

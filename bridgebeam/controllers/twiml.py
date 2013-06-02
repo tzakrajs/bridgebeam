@@ -1,6 +1,6 @@
 from bridgebeam import application
 from bottle import request
-from bridgebeam.models.conference import Conference, remove_from_conferences
+from bridgebeam.models.conference import Conference
 from twilio import twiml
 import logging
 

@@ -4,34 +4,25 @@ import logging
 import re
 import uuid
 
-def remove_from_conferences(call_sid):
-    db = DB()
-    db.remove_call(call_sid)
-
-def get_conferences():
-    db = DB()
-    return db.get_conferences()
-
 class Conference(object):
-    """This object describes a conference bridge
-       and implements behavior."""
+    """
+    Context manager used to maintain unique identifiers for conference bridges
+    
+    """
 
     def __init__(self, **kwargs):
-        """Create identity of the conference"""
-        # create our connection now, we will need it
-        self.db = DB()
+        """Establish conference identity needed to direct new callers"""
         # instantiate logger
         self.log = logging.getLogger('bridgebeam')
-        # set identifying fields
-        self.uuid = kwargs.get('uuid')
-        if self.uuid == None:
-            self.uuid = str(uuid.uuid4())
+        # get bridgebeam conference uuid
+        self.uuid = kwargs.get('uuid', uuid.uuid4())
+        # connect to the db
+        self.db = DB()
         try:
-            # set name if it was passed as an kwarg
+            # set conference name if it was passed as an kwarg
             self.name = self._sanitize_name(kwargs.get('name'))
         except TypeError as e:
             # otherwise, lets grab it from the database
-            self.log.error(e)
             self.name = self.db.get_conference_name(self.uuid)
         # add conference to db if it doesn't already exist
         if self.uuid and self.name:
@@ -65,21 +56,49 @@ class Conference(object):
             e164_number = self._e164_number(phone_number)
             self.log.debug("making call to twilio for: {}".format(e164_number))
             our_number = '+16502654910'
-            url_to_join = "http://somedomain.com/twiml/join/{}".format(self.uuid)
-            url_to_quit = "http://somedomain.com/twiml/quit"
+            url_to_join = '{}/twiml/join/{}'.format(self.twiml_base_url, self.uuid)
+            url_to_quit = '{}/twiml/quit'.format(self.twiml_base_url)
             twilio_call  = twilio.calls.create(to=e164_number,
                                                from_=our_number,
                                                url=url_to_join,
                                                status_callback=url_to_quit)
 
     def add(self, call_sid=None, call_number=None):
+        """Associates a call to the conference"""
         if call_sid and call_number and self.uuid:
             self.db.add_to_conference(call_sid, self.uuid, call_number) 
 
+    @classmethod
+    def remove_from_conferences(call_sid):
+        """Removes call from all conferences for given call_sid"""
+        db = DB()
+        db.remove_call(call_sid)
+        db.destroy()
+
     def get_name(self):
+        """Determines bridgebeam conference uuid"""
         name = self.db.get_conference_name(self.uuid)
         return name
    
+    @classmethod
+    def get_conferences(self):
+        """
+        Returns a dict of conferences
+        - Each key in the dict contains a list of phone numbers
+        - Those phone numbers represent present calls connected to the bridge
+
+        """ 
+        db = DB()
+        conferences = {}
+        rows = db.get_conferences()
+        for conference_name, phone_number in rows:
+            if conference_name in conferences.keys():
+                conferences[conference_name].append(phone_number)
+            else:
+                conferences[conference_name] = [phone_number,]
+        db.destroy()
+        return conferences
+
     def destroy(self):
-        # close our connection to the DB
+        """Close our connection to the DB"""
         self.db.destroy()
