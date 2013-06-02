@@ -8,6 +8,14 @@ log = logging.getLogger('bridgebeam')
 
 @application.route('/twiml/join/<conference_uuid>', method='POST')
 def join(conference_uuid):
+    """
+    TwiML Endpoint for for Twilio join callbacks
+
+    Has two modes depending on the value of POST variable 'Digits':
+      - != 1: Ask the caller to press 1 to join the bridge
+      - == 1: Join the caller to the conference bridge
+
+    """
     log.debug("received join on {}".format(conference_uuid))
     conference = Conference(uuid=conference_uuid)
     conference_name = conference.get_name()
@@ -27,10 +35,10 @@ def join(conference_uuid):
         d = twiml.Dial()
         d.append(twiml.Conference(conference_uuid))
         r.append(d)
-        log.debug("caller is now entering conference_uuid: {}".format(conference_uuid))
+        log.info("caller is now entering conference_uuid: {}".format(conference_uuid))
         return str(r)
     else:
-        log.debug("caller will be prompted to join")
+        log.info("caller will be prompted to join")
         with r.gather(timeout=10, numDigits=1) as g:
             g.say("You have been requested to join the conference bridge named, {}".format(conference_name))
             g.say("To accept, please press one")
@@ -41,6 +49,12 @@ def join(conference_uuid):
 
 @application.route('/twiml/quit', method='POST')
 def quit():
+    """
+    TwiML Endpoint for for Twilio quit callbacks
+
+    Logically removes the call from bridge beam conferences
+
+    """
     call_sid = request.forms.get('CallSid')
     log.debug("received quit from {}".format(call_sid))
     remove_from_conferences(call_sid)

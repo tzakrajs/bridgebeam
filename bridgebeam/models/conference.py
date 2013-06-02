@@ -42,6 +42,7 @@ class Conference(object):
             return None
 
     def _e164_number(self, number):
+        """Remove all but numerals then format for E.164"""
         only_numbers = ''.join(i for i in number if i.isdigit())
         if len(only_numbers) == 10:
             return '+1{}'.format(only_numbers)

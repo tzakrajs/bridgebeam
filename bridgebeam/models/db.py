@@ -16,11 +16,15 @@ class DB(object):
 
     def _create_schema(self):
         """Create the schema for our sqlite3 db""" 
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS conferences (uuid text, name text, conference_sid text)")
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS calls (sid text, phone_number text, conference_uuid text)")
+        q = ["CREATE TABLE IF NOT EXISTS " + \
+                 "conferences (uuid text, name text, conference_sid text)",
+             "CREATE TABLE IF NOT EXISTS " + \
+                 "calls (sid text, phone_number text, conference_uuid text)"]
+        for x in q: self.cursor.execute(x)
         self.conn.commit()
 
     def get_conference_uuid(self, name):
+        """Returns bridge beam conference uuid for given bridge name"""
         q = "SELECT uuid FROM conferences WHERE name=?"
         r = self.cursor.execute(q, (name,)).fetchone()
         try:
@@ -31,6 +35,7 @@ class DB(object):
         return conference_uuid
 
     def get_conference_name(self, uuid):
+        """Returns conference name for given bridge beam conference uuid"""
         self.log.info("looking up conference by uuid: {}".format(uuid))
         q = "SELECT name FROM conferences WHERE uuid='{}'".format(uuid)
         self.log.info('query: {}'.format(q))
@@ -61,10 +66,13 @@ class DB(object):
             self.cursor.execute(q, (uuid, name))
             self.conn.commit()
 
-    def add_to_conference(self, call_sid=None, conference_uuid=None, phone_number=None):
+    def add_to_conference(
+            self, call_sid=None, conference_uuid=None, 
+            phone_number=None):
         """Add a new call into the calls table"""
         if conference_uuid and call_sid and phone_number:
-            q = "INSERT INTO calls (sid, phone_number, conference_uuid) VALUES (?, ?, ?)"
+            q = "INSERT INTO calls (sid, phone_number, conference_uuid) " + \
+                "VALUES (?, ?, ?)"
             self.cursor.execute(q, (call_sid, phone_number, conference_uuid))
             self.conn.commit()
 
@@ -74,5 +82,7 @@ class DB(object):
             q = "DELETE FROM calls WHERE sid='{}'".format(call_sid) 
             self.cursor.execute(q)
             self.conn.commit()
+
     def destroy(self):
+        """Close connection to the databse"""
         self.cursor.close()
