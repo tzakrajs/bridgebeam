@@ -8,7 +8,7 @@ class DB(object):
         """Instantiates a database if none exists"""
         # instantiate logger
         self.log = logging.getLogger('bridgebeam')
-        # open sqlite db (yes this is gross... it's hackday!)
+        # open sqlite db
         db_path=application.config.DB.path
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
@@ -26,23 +26,29 @@ class DB(object):
         try:
             conference_uuid = r[0]
         except TypeError as e:
-            self.log.error(e)
+            self.log.warning("miss on the db for {}: {}".format(q, e))
             conference_uuid = None
         return conference_uuid
 
     def get_conference_name(self, uuid):
-        self.log.info('looking up conference by uuid: {}'.format(uuid))
+        self.log.info("looking up conference by uuid: {}".format(uuid))
         q = "SELECT name FROM conferences WHERE uuid='{}'".format(uuid)
         self.log.info('query: {}'.format(q))
         r = self.cursor.execute(q).fetchone()
         try:
             conference_name = r[0]
         except TypeError as e:
-            self.log.error(e)
+            self.log.warning("miss on the db for {}: {}".format(q, e))
             conference_name = None
         return conference_name
 
     def get_conferences(self):
+        """
+        Returns a dict of conferences
+        - Each key in the dict contains a list of phone numbers
+        - Those phone numbers represent present calls connected to the bridge
+
+        """
         q = "SELECT name, phone_number FROM conferences, calls WHERE conferences.uuid = calls.conference_uuid"
         rows = self.cursor.execute(q).fetchall()
         conferences = {}
@@ -55,18 +61,21 @@ class DB(object):
                 
 
     def create_conference(self, uuid=None, name=None):
+        """Add a new conference into the conferences table"""
         if uuid and name:
             q = "INSERT INTO conferences (uuid, name) VALUES (?, ?)" 
             self.cursor.execute(q, (uuid, name))
             self.conn.commit()
 
     def add_to_conference(self, call_sid=None, conference_uuid=None, phone_number=None):
+        """Add a new call into the calls table"""
         if conference_uuid and call_sid and phone_number:
             q = "INSERT INTO calls (sid, phone_number, conference_uuid) VALUES (?, ?, ?)"
             self.cursor.execute(q, (call_sid, phone_number, conference_uuid))
             self.conn.commit()
 
     def remove_call(self, call_sid):
+        """Remove call from the calls table"""
         if call_sid:
             q = "DELETE FROM calls WHERE sid='{}'".format(call_sid) 
             self.cursor.execute(q)
