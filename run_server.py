@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+import os
+import sys
+
+# do some magic if we are running wsgi
+try:
+    import mod_wsgi
+
+    # Change working directory so relative paths (and template lookup) work again
+    os.chdir(os.path.dirname(__file__))
+
+    # Add working directory to paths
+    sys.path.append(os.path.dirname(__file__))
+except:
+    pass
+
 from bridgebeam import application
 import logging
 
