@@ -19,7 +19,13 @@ setup(
         scripts=['run_server.py', ],
 
         include_package_data=True,
-        packages=find_packages(),
+        packages=['bridgebeam'],
+        package_dir={'bridgebeam': 'bridgebeam'},
+        package_data={'bridgebeam': ['views/*.tpl',
+                                     'static/js/*.js',
+                                     'static/css/*.css',
+                                     'static/img/*.png',
+                                     'static/img/*.gif']},
 
         license=open('LICENSE').read(),
 
