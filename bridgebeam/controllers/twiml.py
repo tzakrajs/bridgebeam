@@ -1,10 +1,24 @@
 from bridgebeam import application
-from bottle import request
+from bottle import request, abort
 from bridgebeam.models.conference import Conference
 from twilio import twiml
+from twilio.util import RequestValidator
 import logging
 
 log = logging.getLogger('bridgebeam')
+
+def validate_twiml():
+    twilio_signature = request.get_header('X-Twilio-Signature')
+    params = request.forms
+    url = application.config.Twiml.callback_base_url + request.fullpath
+    auth_token = application.config.Twilio.auth_token
+    validator = RequestValidator(auth_token)
+    validation = validator.validate(url, params, twilio_signature)
+    log.debug("Validator: {}".format(validation))
+    log.debug("Twilio-signature: {}\r".format(twilio_signature) + \
+              "Params: {}\r".format(params) + \
+              "Url: {}".format(url))
+    return validation
 
 @application.route('/twiml/join/<conference_uuid>', method='POST')
 def join(conference_uuid):
@@ -16,6 +30,8 @@ def join(conference_uuid):
       - == 1: Join the caller to the conference bridge
 
     """
+    if validate_twiml() == False:
+        abort(403, 'Validation failed')
     log.debug("received join on {}".format(conference_uuid))
     conference = Conference(uuid=conference_uuid)
     conference_name = conference.get_name()
@@ -42,7 +58,7 @@ def join(conference_uuid):
         with r.gather(timeout=10, numDigits=1) as g:
             g.say("You have been requested to join the conference bridge named, {}".format(conference_name))
             g.say("To accept, please press one")
-        r.redirect('http://somedomain.com/twiml/join/{}'.format(conference_uuid), method='POST')
+        r.redirect('{}/twiml/join/{}'.format(application.config.Twiml.callback_base_url, conference_uuid), method='POST')
         log.debug("sending join prompt now")
         log.debug("sending twiml: {}".format(str(r)))
         return str(r)
@@ -55,6 +71,8 @@ def quit():
     Logically removes the call from bridge beam conferences
 
     """
+    if validate_twiml() == False:
+        abort(403, 'Validation failed')
     call_sid = request.forms.get('CallSid')
     log.debug("received quit from {}".format(call_sid))
     Conference.remove_from_conferences(call_sid)
